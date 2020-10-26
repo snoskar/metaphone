@@ -106,7 +106,11 @@ namespace Metaphone
 
         private static string ProcessB(string input, int position)
         {
-            throw new NotImplementedException();
+            // unless at the end of a word after "m" as in "dumb"
+            if (position == input.Length - 1 && Match(input, position - 1, "M"))
+                return string.Empty;
+
+            return "B";
         }
 
         private static string ProcessC(string input, int position)
@@ -157,6 +161,14 @@ namespace Metaphone
         private static string ProcessY(string input, int position)
         {
             throw new NotImplementedException();
+        }
+
+        private static bool Match(string input, int position, string value)
+        {
+            if (position < 0 || position > input.Length)
+                return false;
+
+            return string.Compare(input, position, value, 0, value.Length) == 0;
         }
     }
 }
