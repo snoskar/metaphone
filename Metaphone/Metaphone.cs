@@ -261,7 +261,7 @@ namespace Metaphone
 
         private static bool Match(string input, int position, string[] values)
         {
-            if (position < 0 || position > input.Length)
+            if (position < 0 || position >= input.Length)
                 return false;
 
             foreach (var value in values)
