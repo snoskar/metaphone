@@ -168,7 +168,7 @@ namespace Metaphone
         private static string ProcessCharacterG(string input, int position)
         {
             // in -gh- and not at end or before a vowel
-            if (Match(input, position, "GH") && (position < input.Length - 2) || Match(input, position + 1, _vowels))
+            if (Match(input, position, "GH") && ((position < input.Length - 2) || Match(input, position + 1, _vowels)))
                 return string.Empty;
 
             // in -gn- or -gned-
@@ -184,8 +184,12 @@ namespace Metaphone
 
         private static string ProcessCharacterH(string input, int position)
         {
+            //TODO: This rule generates wrong output.
+            // -pho- => -fh-. Should be -f-. 
+            // Should be silent if -ch-, -sh-, -ph- and -th-. 
+
             // if after vowel and no vowel follows
-            if (Match(input, position - 1, _vowels) && Match(input, position + 1, _vowels))
+            if (Match(input, position - 1, _vowels) && !Match(input, position + 1, _vowels))
                 return string.Empty;
 
             return "H";
