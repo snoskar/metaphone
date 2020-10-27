@@ -11,17 +11,36 @@ namespace Metaphone
         public static string Encode(string input)
         {
             var result = new StringBuilder();
+            
             input = input.ToUpper();
+            input = ProcessInitialExceptions(input);
 
             for (int position = 0; position < input.Length; position++)
             {
-                var ProcessedCharacter = ProcessCharacter(input, position);
+                var processedCharacter = ProcessCharacter(input, position);
 
-                if (!string.IsNullOrEmpty(ProcessedCharacter))
-                    result.Append(ProcessedCharacter);
+                if (!string.IsNullOrEmpty(processedCharacter))
+                    result.Append(processedCharacter);
             }
 
             return result.ToString();
+        }
+
+        private static string ProcessInitialExceptions(string input)
+        {
+            // Initial kn-, gn-, pn-, ac- or wr- drop first letter
+            if (Match(input, 0, new[] { "KN", "GN", "PN", "AC", "WR" }))
+                input = input.Substring(1);
+
+            // Initial x- change to "s"
+            if (Match(input, 0, "X"))
+                input = "S" + input.Substring(1);
+
+            // Initial wh- change to "w"
+            if (Match(input, 0, "WH"))
+                input = "W" + input.Substring(2);
+
+            return input;
         }
 
         private static string ProcessCharacter(string input, int position)
@@ -36,7 +55,7 @@ namespace Metaphone
                 case 'I':
                 case 'O':
                 case 'U':
-                    result = position == 0 ? character.ToString() : string.Empty;
+                    result = ProcessVowel(character, position);
                     break;
                 case 'B':
                     result = ProcessCharacterB(input, position);
@@ -104,6 +123,15 @@ namespace Metaphone
             }
 
             return result;
+        }
+
+        private static string ProcessVowel(char character, int position)
+        {
+            // Vowels are kept only when they are the first letter.
+            if (position == 0)
+                return character.ToString();
+
+            return string.Empty;
         }
 
         private static string ProcessCharacterB(string input, int position)
