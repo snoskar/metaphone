@@ -6,6 +6,8 @@ namespace Metaphone
 {
     public static class Metaphone
     {
+        private static readonly string[] _vowels = { "A", "E", "I", "O", "U" };
+
         public static string Encode(string input)
         {
             var result = new StringBuilder();
@@ -37,28 +39,28 @@ namespace Metaphone
                     result = position == 0 ? character.ToString() : string.Empty;
                     break;
                 case 'B':
-                    result = ProcessB(input, position);
+                    result = ProcessCharacterB(input, position);
                     break;
                 case 'C':
-                    result = ProcessC(input, position);
+                    result = ProcessCharacterC(input, position);
                     break;
                 case 'D':
-                    result = ProcessD(input, position);
+                    result = ProcessCharacterD(input, position);
                     break;
                 case 'F':
                     result = "F";
                     break;
                 case 'G':
-                    result = ProcessG(input, position);
+                    result = ProcessCharacterG(input, position);
                     break;
                 case 'H':
-                    result = ProcessH(input, position);
+                    result = ProcessCharacterH(input, position);
                     break;
                 case 'J':
                     result = "J";
                     break;
                 case 'K':
-                    result = ProcessK(input, position);
+                    result = ProcessCharacterK(input, position);
                     break;
                 case 'L':
                     result = "L";
@@ -70,7 +72,7 @@ namespace Metaphone
                     result = "N";
                     break;
                 case 'P':
-                    result = ProcessP(input, position);
+                    result = ProcessCharacterP(input, position);
                     break;
                 case 'Q':
                     result = "K";
@@ -79,22 +81,22 @@ namespace Metaphone
                     result = "R";
                     break;
                 case 'S':
-                    result = ProcessS(input, position);
+                    result = ProcessCharacterS(input, position);
                     break;
                 case 'T':
-                    result = ProcessT(input, position);
+                    result = ProcessCharacterT(input, position);
                     break;
                 case 'V':
                     result = "F";
                     break;
                 case 'W':
-                    result = ProcessW(input, position);
+                    result = ProcessCharacterW(input, position);
                     break;
                 case 'X':
                     result = "KS";
                     break;
                 case 'Y':
-                    result = ProcessY(input, position);
+                    result = ProcessCharacterY(input, position);
                     break;
                 case 'Z':
                     result = "S";
@@ -104,7 +106,7 @@ namespace Metaphone
             return result;
         }
 
-        private static string ProcessB(string input, int position)
+        private static string ProcessCharacterB(string input, int position)
         {
             // unless at the end of a word after "m" as in "dumb"
             if (position == input.Length - 1 && Match(input, position - 1, "M"))
@@ -113,62 +115,134 @@ namespace Metaphone
             return "B";
         }
 
-        private static string ProcessC(string input, int position)
+        private static string ProcessCharacterC(string input, int position)
         {
-            throw new NotImplementedException();
+            // (sh) if -cia- or -ch
+            if (Match(input, position, new[] { "CIA", "CH" }))
+                return "X";
+
+            // if -ci-, -ce- or -cy
+            if (Match(input, position, new[] { "CI", "CE", "CY" }))
+                return "S";
+
+            return "K";
         }
 
-        private static string ProcessD(string input, int position)
+        private static string ProcessCharacterD(string input, int position)
         {
-            throw new NotImplementedException();
+            // if in -dge-, -dgy- or -dgi
+            if (Match(input, position, new[] { "DGE", "DGY", "DGI" }))
+                return "J";
+
+            return "T";
         }
 
-        private static string ProcessG(string input, int position)
+        private static string ProcessCharacterG(string input, int position)
         {
-            throw new NotImplementedException();
+            // in -gh- and not at end or before a vowel
+            if (Match(input, position, "GH") && (position < input.Length - 2) || Match(input, position + 1, _vowels))
+                return string.Empty;
+
+            // in -gn- or -gned-
+            if (Match(input, position, "GN") || Match(input, position, "GNED"))
+                return string.Empty;
+
+            //if before i or e or y if not double gg
+            if (Match(input, position, new[] { "GI", "GE", "GY" }) && (Match(input, position - 1, "GG") || Match(input, position, "GG")))
+                return "J";
+
+            return "K";
         }
 
-        private static string ProcessH(string input, int position)
+        private static string ProcessCharacterH(string input, int position)
         {
-            throw new NotImplementedException();
+            // if after vowel and no vowel follows
+            if (Match(input, position - 1, _vowels) && Match(input, position + 1, _vowels))
+                return string.Empty;
+
+            return "H";
         }
 
-        private static string ProcessK(string input, int position)
+        private static string ProcessCharacterK(string input, int position)
         {
-            throw new NotImplementedException();
+            // if after "c"
+            if (Match(input, position - 1, "CK"))
+                return string.Empty;
+
+            return "K";
         }
 
-        private static string ProcessP(string input, int position)
+        private static string ProcessCharacterP(string input, int position)
         {
-            throw new NotImplementedException();
+            // if in -ph
+            if (Match(input, position, "PH"))
+                return "F";
+
+            return "P";
         }
 
-        private static string ProcessS(string input, int position)
+        private static string ProcessCharacterS(string input, int position)
         {
-            throw new NotImplementedException();
+            // if before "h" or in -sio- or -sia
+            if (Match(input, position, new[] { "SH", "SIO", "SIA" }))
+                return "X";
+
+            return "S";
         }
 
-        private static string ProcessT(string input, int position)
+        private static string ProcessCharacterT(string input, int position)
         {
-            throw new NotImplementedException();
+            // if -tia- or -tio
+            if (Match(input, position, new[] { "TIO", "TIA" }))
+                return "X";
+
+            // if before "h"
+            if (Match(input, position, "TH"))
+                return "0";
+
+            // if in -tch-
+            if (Match(input, position, "TCH"))
+                return string.Empty;
+
+            return "T";
         }
 
-        private static string ProcessW(string input, int position)
+        private static string ProcessCharacterW(string input, int position)
         {
-            throw new NotImplementedException();
+            // if followed by a vowel
+            if (Match(input, position + 1, _vowels))
+                return "W";
+
+            return string.Empty;
         }
 
-        private static string ProcessY(string input, int position)
+        private static string ProcessCharacterY(string input, int position)
         {
-            throw new NotImplementedException();
+            // if followed by a vowel
+            if (Match(input, position + 1, _vowels))
+                return "Y";
+
+            return string.Empty;
         }
+
 
         private static bool Match(string input, int position, string value)
+        {
+            return Match(input, position, new[] { value });
+        }
+
+        private static bool Match(string input, int position, string[] values)
         {
             if (position < 0 || position > input.Length)
                 return false;
 
-            return string.Compare(input, position, value, 0, value.Length) == 0;
+            foreach (var value in values)
+            {
+                if (string.Compare(input, position, value, 0, value.Length) == 0)
+                    return true;
+            }
+
+            return false;
         }
     }
 }
